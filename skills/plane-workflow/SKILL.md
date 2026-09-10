@@ -4,7 +4,7 @@ description: "Coordinate software delivery in Plane through MCP. Trigger wheneve
 license: MIT
 metadata:
   author: alejoluque
-  version: "0.2.1"
+  version: "0.2.2"
 ---
 
 # Plane workflow

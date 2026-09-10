@@ -89,7 +89,7 @@ test("setup stores the token securely and registers both clients without exposin
   assert.equal(statSync(tokenPath).mode & 0o777, 0o600);
   assert.equal(log.includes(secret), false);
   assert.equal(output.includes(secret), false);
-  assert.equal(log.includes(`npx <--yes> <skills> <add> <${repositoryRoot}/>`), true);
+  assert.equal(log.includes(`npx <--yes> <--package> <skills@1> <skills> <add> <${repositoryRoot}/>`), true);
   assert.match(log, /codex <mcp> <add> <plane-engineering>/);
   assert.match(log, /claude <mcp> <add> <plane-engineering> <--scope> <user>/);
   assert.deepEqual(JSON.parse(readFileSync(join(project, ".plane-project.json"), "utf8")), {
