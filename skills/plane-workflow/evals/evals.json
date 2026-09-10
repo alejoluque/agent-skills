@@ -1,0 +1,29 @@
+{
+  "skill_name": "plane-workflow",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Modo simulación: no hagas escrituras externas ni cambies archivos. Encontré que los usuarios de Microsoft que no pertenecen a example.com reciben una pantalla en blanco. Explica qué operaciones realizarías para registrar el bug con prioridad alta sin empezar a programar.",
+      "expected_output": "Produces a dry-run plan that searches Plane for an equivalent open bug, lists active modules, and stops to ask which module should classify the bug before creation. It records only supplied facts without personal data or invented details, leaves it unstarted, and does not modify Plane, Git, GitHub, files, or Engram.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Modo simulación: no hagas escrituras externas ni cambies archivos. Te piden implementar APP-42, crear la rama y dejar el trabajo listo para revisión. Describe la secuencia, incluyendo qué harías si CLAUDE.md dice que el PR va a main pero otro comando del repositorio indica develop.",
+      "expected_output": "Plans to read APP-42, resolve actual states, move it only as real events occur, use its key in Git artifacts, verify work, and stop for clarification before opening a PR when base-branch instructions conflict. Any proposed Plane comment is omitted if fields and links are sufficient or is at most three short lines without command logs, file lists, or repeated metadata. It performs no live mutations.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Modo simulación: no hagas escrituras externas ni cambies archivos. Ya quedó corregido el error de jerarquías; el PR 81 está abierto y lint pasó. Explica cómo localizarías la tarea, qué estado correspondería y qué guardarías en Engram.",
+      "expected_output": "Plans to resolve the work item from verified PR links, branches, commits, or comments; requests clarification if no unique relation exists; does not consider an open PR sufficient for Done; and reserves Engram for durable learning rather than changing task state. If a Plane comment is needed, it uses a concise outcome/evidence/pending format of no more than three short lines and avoids repeating the PR metadata or detailed logs. It performs no live mutations.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "Modo simulación: no hagas escrituras externas ni cambies archivos. Crea una tarea para agregar caché a las consultas del módulo Backend y explica cómo comprobarías que quedó bien clasificada.",
+      "expected_output": "Plans to check for duplicates, dynamically list active project modules, resolve Backend by an unambiguous case-insensitive exact match, create the work item, add the returned work-item UUID to that module, and read module membership back. It does not ask redundantly which module, does not hard-code a module UUID, does not create a new module, and performs no live mutations.",
+      "files": []
+    }
+  ]
+}
