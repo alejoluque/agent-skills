@@ -3,3 +3,6 @@
 .env
 .env.*
 *.skill
+*.tgz
+node_modules/
+coverage/

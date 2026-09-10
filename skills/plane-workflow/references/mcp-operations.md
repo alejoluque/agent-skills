@@ -7,7 +7,7 @@ Plane MCP tool names vary by server release. Some releases group operations by r
 ## Resolve identifiers
 
 - List projects and match the exact project name or readable identifier before using its UUID.
-- `workitem.retrieve_by_identifier` accepts a readable identifier such as `APP-42`.
+- `workitem.retrieve_by_identifier` accepts a readable identifier such as `PROJ-42`.
 - Other work-item actions normally require `project_id` and the work-item UUID.
 - List or resolve state, label, type, member, cycle, module, milestone, and assignee UUIDs before writing them.
 - For complex list filters, obtain the current PQL reference before composing PQL. UUID-backed PQL fields require UUIDs.
@@ -18,7 +18,7 @@ Plane MCP tool names vary by server release. Some releases group operations by r
 | --- | --- | --- |
 | Search workspace | `workitem.search` | Search meaningful terms before creating |
 | List/filter | `workitem.list` | Project is optional; supports PQL and pagination |
-| Read by key | `workitem.retrieve_by_identifier` | Accepts `PROJECT-N`, for example `APP-42` |
+| Read by key | `workitem.retrieve_by_identifier` | Accepts `PROJECT-N`, for example `PROJ-42` |
 | Read by UUID | `workitem.retrieve` | Requires project and work-item UUIDs |
 | Create | `workitem.create` | Requires project UUID and name |
 | Update | `workitem.update` | Changes only fields supplied |

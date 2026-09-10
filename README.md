@@ -6,9 +6,42 @@ Reusable skills for AI coding agents. The repository currently includes `plane-w
 
 `plane-workflow` keeps Plane authoritative for work items, prevents duplicate tasks, resolves project modules before creation, links verified GitHub evidence, and keeps Plane comments concise.
 
-### Install globally
+### One-command setup (recommended)
 
-Use this when the same workflow should be available in every repository:
+Run this from the project that will use Plane:
+
+```bash
+npx --yes --package github:alejoluque/agent-skills \
+  plane-agents setup
+```
+
+The installer:
+
+- installs `plane-workflow` globally for Claude Code and Codex;
+- asks for the Plane URL, workspace, and Personal Access Token;
+- verifies the token and stores it outside repositories with `600` permissions;
+- registers one user-level MCP connection per workspace in both clients; and
+- creates the non-secret `.plane-project.json` mapping in the current repository.
+
+The connection is named `plane-<workspace>`. Re-running setup updates that managed connection without duplicating it. Projects in the same Plane workspace reuse the connection and only need their own `.plane-project.json`.
+
+For non-interactive setup, supply the token temporarily through the environment rather than a command-line argument:
+
+```bash
+PLANE_API_KEY="..." npx --yes \
+  --package github:alejoluque/agent-skills \
+  plane-agents setup \
+  --base-url https://plane.example.com \
+  --workspace your-workspace \
+  --project PROJ \
+  --yes
+```
+
+Use `plane-agents setup --help` for client selection and advanced options. The installer requires Node.js 18+, `npx`, `uvx`, and at least one of the `claude` or `codex` CLIs.
+
+### Skill-only installation
+
+Use this when Plane MCP is already configured:
 
 ```bash
 npx skills add alejoluque/agent-skills \
@@ -17,7 +50,7 @@ npx skills add alejoluque/agent-skills \
   --global --yes
 ```
 
-### Install in one project
+### Install the skill in one project
 
 Run from that project's root and omit `--global`:
 
@@ -34,19 +67,19 @@ Verify the installation with:
 npx skills list --global
 ```
 
-## Plane MCP requirement
+## Plane MCP configuration
 
-The skill provides workflow instructions; it does not include credentials or automatically install Plane MCP. Configure a Plane MCP server separately with:
+The skill provides workflow instructions. The recommended installer configures the MCP connection with:
 
 - `PLANE_BASE_URL`
 - `PLANE_WORKSPACE_SLUG`
 - `PLANE_API_KEY`
 
-Keep the API key outside repositories and use a personal key with access only to the required workspace and projects. See the [Plane MCP documentation](https://developers.plane.so/dev-tools/mcp-server).
+Keep the API key outside repositories and use a personal key with access only to the required workspace and projects. The installer stores it under `~/.config/plane-agents/` (or `XDG_CONFIG_HOME`) and never places it in `.mcp.json` or `.plane-project.json`. See the [Plane MCP documentation](https://developers.plane.so/dev-tools/mcp-server).
 
 ## Select a Plane project per repository
 
-When one Plane workspace contains several projects, copy the included template to the repository that will use the skill:
+The recommended installer creates this file when `--project` is supplied. To configure it manually, copy the included template:
 
 ```bash
 cp path/to/plane-workflow/assets/plane-project.example.json .plane-project.json
@@ -57,7 +90,7 @@ Then set its non-secret project mapping:
 ```json
 {
   "workspace": "your-workspace",
-  "project_identifier": "APP"
+  "project_identifier": "PROJ"
 }
 ```
 
