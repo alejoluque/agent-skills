@@ -141,6 +141,8 @@ test("setup stores the token securely and registers both clients without exposin
   assert.equal(statSync(tokenPath).mode & 0o777, 0o600);
   assert.equal(log.includes(secret), false);
   assert.equal(output.includes(secret), false);
+  assert.match(output, /Claude: abre el proyecto y aprueba el MCP/);
+  assert.match(output, /Codex: abre el proyecto, márcalo como confiable/);
   assert.equal(log.includes(`npx <--yes> <--package> <skills@1> <skills> <add> <${repositoryRoot}/>`), true);
   assert.match(log, /codex <mcp> <remove> <plane-engineering>/);
   assert.match(log, /claude <mcp> <remove> <--scope> <user> <plane-engineering>/);

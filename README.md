@@ -25,6 +25,8 @@ The installer:
 
 The project connection is named `plane`. Claude Code reads it from `.mcp.json`; Codex reads it from `.codex/config.toml` after the repository is trusted. Local MCP configuration is excluded through `.git/info/exclude` when it is not already tracked. Each repository can therefore use a different Plane instance, workspace, and token without affecting other projects.
 
+After setup, open the repository in each client once. Approve the project MCP in Claude Code and mark the repository as trusted in Codex when prompted; Codex intentionally ignores project-level configuration until that trust is granted.
+
 When upgrading from `v0.2.x`, setup reuses the saved token when possible and removes the old user-level `plane-<workspace>` connection after the project configuration succeeds. Run setup once in every repository that needs Plane.
 
 For non-interactive setup, supply the token temporarily through the environment rather than a command-line argument:
@@ -75,9 +77,9 @@ The skill provides workflow instructions. The recommended installer configures t
 
 - `PLANE_BASE_URL`
 - `PLANE_WORKSPACE_SLUG`
-- `PLANE_API_KEY`
+- `PLANE_API_KEY_FILE`
 
-Keep the API key outside repositories and use a personal key with access only to the required workspace and projects. The installer stores separate credentials by Plane instance and workspace under `~/.config/plane-agents/connections/` (or `XDG_CONFIG_HOME`) and never places tokens in `.mcp.json`, `.codex/config.toml`, or `.plane-project.json`. See the [Plane MCP documentation](https://developers.plane.so/dev-tools/mcp-server).
+Keep the API key outside repositories and use a personal key with access only to the required workspace and projects. The installer accepts `PLANE_API_KEY` as temporary setup input, stores separate credentials by Plane instance and workspace under `~/.config/plane-agents/connections/` (or `XDG_CONFIG_HOME`), and configures the MCP with `PLANE_API_KEY_FILE`. It never places tokens in `.mcp.json`, `.codex/config.toml`, or `.plane-project.json`. See the [Plane MCP documentation](https://developers.plane.so/dev-tools/mcp-server).
 
 ## Select a Plane project per repository
 
