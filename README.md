@@ -20,10 +20,12 @@ The installer:
 - installs `plane-workflow` globally for Claude Code and Codex;
 - asks for the Plane URL, workspace, and Personal Access Token;
 - verifies the token and stores it outside repositories with `600` permissions;
-- registers one user-level MCP connection per workspace in both clients; and
+- writes project-scoped MCP configuration for both clients; and
 - creates the non-secret `.plane-project.json` mapping in the current repository.
 
-The connection is named `plane-<workspace>`. Re-running setup updates that managed connection without duplicating it. Projects in the same Plane workspace reuse the connection and only need their own `.plane-project.json`.
+The project connection is named `plane`. Claude Code reads it from `.mcp.json`; Codex reads it from `.codex/config.toml` after the repository is trusted. Local MCP configuration is excluded through `.git/info/exclude` when it is not already tracked. Each repository can therefore use a different Plane instance, workspace, and token without affecting other projects.
+
+When upgrading from `v0.2.x`, setup reuses the saved token when possible and removes the old user-level `plane-<workspace>` connection after the project configuration succeeds. Run setup once in every repository that needs Plane.
 
 For non-interactive setup, supply the token temporarily through the environment rather than a command-line argument:
 
@@ -75,7 +77,7 @@ The skill provides workflow instructions. The recommended installer configures t
 - `PLANE_WORKSPACE_SLUG`
 - `PLANE_API_KEY`
 
-Keep the API key outside repositories and use a personal key with access only to the required workspace and projects. The installer stores it under `~/.config/plane-agents/` (or `XDG_CONFIG_HOME`) and never places it in `.mcp.json` or `.plane-project.json`. See the [Plane MCP documentation](https://developers.plane.so/dev-tools/mcp-server).
+Keep the API key outside repositories and use a personal key with access only to the required workspace and projects. The installer stores separate credentials by Plane instance and workspace under `~/.config/plane-agents/connections/` (or `XDG_CONFIG_HOME`) and never places tokens in `.mcp.json`, `.codex/config.toml`, or `.plane-project.json`. See the [Plane MCP documentation](https://developers.plane.so/dev-tools/mcp-server).
 
 ## Select a Plane project per repository
 

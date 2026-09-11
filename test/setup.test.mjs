@@ -5,7 +5,14 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import test from "node:test";
 
-import { normalizeBaseUrl, normalizeName, parseArgs, run } from "../lib/setup.mjs";
+import {
+  buildClaudeProjectConfig,
+  buildCodexProjectConfig,
+  normalizeBaseUrl,
+  normalizeName,
+  parseArgs,
+  run,
+} from "../lib/setup.mjs";
 
 const repositoryRoot = resolve(import.meta.dirname, "..");
 const cliPath = join(repositoryRoot, "bin", "plane-agents.mjs");
@@ -47,6 +54,46 @@ test("non-interactive setup requires instance-specific values", async () => {
   );
 });
 
+test("project config builders preserve unrelated configuration and update managed entries", () => {
+  const claude = buildClaudeProjectConfig(
+    '{"mcpServers":{"docs":{"command":"docs-server"}},"setting":true}',
+    "plane",
+    "/runtime.mjs",
+    "/api-key",
+    "https://plane.example.com",
+    "engineering",
+  );
+  const parsedClaude = JSON.parse(claude);
+  assert.equal(parsedClaude.setting, true);
+  assert.equal(parsedClaude.mcpServers.docs.command, "docs-server");
+  assert.equal(parsedClaude.mcpServers.plane.env.PLANE_WORKSPACE_SLUG, "engineering");
+
+  const firstCodex = buildCodexProjectConfig(
+    'model = "example"\n',
+    "plane",
+    "/runtime.mjs",
+    "/api-key",
+    "https://plane.example.com",
+    "engineering",
+  );
+  const updatedCodex = buildCodexProjectConfig(
+    firstCodex,
+    "plane",
+    "/runtime.mjs",
+    "/new-api-key",
+    "https://other-plane.example.com",
+    "other-workspace",
+  );
+  assert.match(updatedCodex, /^model = "example"/);
+  assert.equal(updatedCodex.match(/# BEGIN plane-agents:plane/g)?.length, 1);
+  assert.match(updatedCodex, /PLANE_API_KEY_FILE = "\/new-api-key"/);
+  assert.equal(updatedCodex.includes("https://plane.example.com"), false);
+  assert.throws(
+    () => buildCodexProjectConfig('[mcp_servers.plane]\ncommand = "custom"\n', "plane", "/runtime", "/token", "https://plane.example.com", "engineering"),
+    /MCP no administrado/,
+  );
+});
+
 test("setup stores the token securely and registers both clients without exposing it", () => {
   const root = mkdtempSync(join(tmpdir(), "plane-agents-test-"));
   const configDirectory = join(root, "config");
@@ -56,6 +103,7 @@ test("setup stores the token securely and registers both clients without exposin
   const commandLog = join(root, "commands.log");
   mkdirSync(project, { recursive: true });
   mkdirSync(fakeBin, { recursive: true });
+  execFileSync("git", ["init", "--quiet"], { cwd: project });
 
   for (const command of ["npx", "codex", "claude", "uvx"]) {
     const script = join(fakeBin, command);
@@ -83,15 +131,24 @@ test("setup stores the token securely and registers both clients without exposin
     "--yes",
   ], { cwd: project, env, encoding: "utf8" });
 
-  const tokenPath = join(configDirectory, "plane-agents", "plane-engineering", "api-key");
+  const claudeConfig = JSON.parse(readFileSync(join(project, ".mcp.json"), "utf8"));
+  const tokenPath = claudeConfig.mcpServers.plane.env.PLANE_API_KEY_FILE;
   const log = readFileSync(commandLog, "utf8");
+  const codexConfig = readFileSync(join(project, ".codex", "config.toml"), "utf8");
+  const gitExclude = readFileSync(join(project, ".git", "info", "exclude"), "utf8");
+  assert.equal(tokenPath.startsWith(join(configDirectory, "plane-agents", "connections")), true);
   assert.equal(readFileSync(tokenPath, "utf8"), `${secret}\n`);
   assert.equal(statSync(tokenPath).mode & 0o777, 0o600);
   assert.equal(log.includes(secret), false);
   assert.equal(output.includes(secret), false);
   assert.equal(log.includes(`npx <--yes> <--package> <skills@1> <skills> <add> <${repositoryRoot}/>`), true);
-  assert.match(log, /codex <mcp> <add> <plane-engineering>/);
-  assert.match(log, /claude <mcp> <add> <plane-engineering> <--scope> <user>/);
+  assert.match(log, /codex <mcp> <remove> <plane-engineering>/);
+  assert.match(log, /claude <mcp> <remove> <--scope> <user> <plane-engineering>/);
+  assert.equal(claudeConfig.mcpServers.plane.env.PLANE_BASE_URL, "https://plane.example.com");
+  assert.match(codexConfig, /\[mcp_servers\."plane"\]/);
+  assert.match(codexConfig, /PLANE_WORKSPACE_SLUG = "engineering"/);
+  assert.match(gitExclude, /^\/\.mcp\.json$/m);
+  assert.match(gitExclude, /^\/\.codex\/config\.toml$/m);
   assert.deepEqual(JSON.parse(readFileSync(join(project, ".plane-project.json"), "utf8")), {
     workspace: "engineering",
     project_identifier: "PROJ",
